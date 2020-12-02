@@ -34,3 +34,6 @@ def register():
     else:
         return "todo"
 
+@app.route("/play")
+def play():
+    return "todo"
