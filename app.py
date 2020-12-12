@@ -1,19 +1,20 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, session
+from flask_socketio import SocketIO, emit
+from werkzeug.security import generate_password_hash
+import helper
+import sqlite3
+
+db = sqlite3.connect("test.db")
+c = db.cursor()
 
 app = Flask(__name__)
+app.config["SECRET KEY"] = "dsd8+s97#*f89s#9ks"
 
-#!!!TODO!! Delete These when finished or research what they do just for debugging 
-# Ensure templates are auto-reloaded
-app.config["TEMPLATES_AUTO_RELOAD"] = True
+#socketio init
+socketio = SocketIO(app)
 
-# Ensure responses aren't cached
-@app.after_request
-def after_request(response):
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Expires"] = 0
-    response.headers["Pragma"] = "no-cache"
-    return response
-
+rooms = []
+usernames = []
 
 @app.route("/")
 def index():
@@ -32,8 +33,27 @@ def register():
     if request.method == "GET":
         return render_template("register.html")
     else:
-        return "todo"
+        username = request.form.get("username").lower()
+        password = generate_password_hash(request.form.get("password"))
+        # open db and add to it if username, pw is not empty and username does not already exist
+        with sqlite3.connect("test.db") as db:
+            c = db.cursor()
+            if helper.register_user(c, username, password):
+                db.commit()
+                return redirect("/")
+            else:
+                return "error"
 
-@app.route("/play")
+@app.route("/play", methods=["GET", "POST"])
 def play():
-    return "todo"
+    return render_template("play.html")
+
+# chat event shit 
+@socketio.on("my_event", namespace="/play")
+def handle_my_custom_event(json):
+    print(f"received {str(json)}")
+    emit("my response", json)
+
+
+if __name__ == "__main__":
+    socketio.run(app, debug=True)

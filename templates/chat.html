@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+
+	<script src="/static/js/play.js"></script>
+{% endblock %}
+
+{% block body %}
+	<div class="message_holder"></div>
+	<form action="" method="POST">
+		<input type="text" class="username" placeholder="Username"/>	
+		<input type="text" class="message" placeholder="Message"/>
+		<input type="submit"/>
+	</form>
+
+{% endblock %}

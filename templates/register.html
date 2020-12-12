@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block head %}
+	<title>Register</title>
+{% endblock %}
+
+{% block body %}
+	<form action="/register" method="post">
+		<div class="form-group">
+			<input autocomplete="off" autofocus class="form-control" placeholder="Username" name="username" type="text">
+  		</div>
+		<div class="form-group">
+			<input autocomplete="off" class="form-control" placeholder="Password" name="password" type="password">
+		</div>	
+		<div class="form-group">
+			<input autocomplete="off" class="form-control" placeholder="Repeat Password" name="check_password" type="password">
+		</div>
+		<button class="btn btn-light" type="submit">Register</button>
+	</form>
+
+{% endblock %}

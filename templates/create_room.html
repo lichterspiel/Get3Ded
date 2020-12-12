@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+
+{% block head %}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+{% endblock %}
+
+{% block body %}
+	<form action="/c_room" method="POST">
+		<div class=form-goup>
+			<input type="text" class="form-control" name="room_name" autofocus autocomplete=off/>
+			<input type="text" class="form-control" name="username" autocomplete=off/>
+			<button type="submit" class="btn btn-primary mb-1 ml-1">Create</button>
+
+		</div>
+	</form>
+{% endblock %}
