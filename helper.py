@@ -2,10 +2,10 @@ import sqlite3
 
 # is it better to connec once or every time function is called 
 # connect to database
-#db = sqlite3.connect("test.db")
+db = sqlite3.connect("test.db")
 
 # create cursor to execute SQL querys
-#c = db.cursor()
+c = db.cursor()
 
 # return 0 for success
 def create_database(c):
@@ -33,7 +33,7 @@ def register_user(c,username, password):
 
     
 def get_user(c,username, password):
-    user = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
+    user = c.execute("SELECT password FROM users WHERE username=?", (username,)).fetchone()    
     return user
 
-
+print(get_user(c,"34",1))
