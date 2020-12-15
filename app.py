@@ -3,13 +3,17 @@ from flask_socketio import SocketIO, emit
 from werkzeug.security import generate_password_hash, check_password_hash
 import helper
 import sqlite3
-
+import os
 
 app = Flask(__name__)
-app.config["SECRET KEY"] = "dsd8+s97#*f89s#9ks"
+app.config["SECRET KEY"] = os.urandom(32)
+
+# sessions
+app.config["PERMANENT_SESSION_LIFETIME"] = False
 
 #socketio init
 socketio = SocketIO(app)
+
 
 
 @app.route("/")
