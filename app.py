@@ -2,11 +2,13 @@ from flask import Flask, render_template, redirect, request, session
 from flask_socketio import SocketIO, emit
 from werkzeug.security import generate_password_hash, check_password_hash
 import helper
+from helper import login_required
 import sqlite3
 import os
 
 app = Flask(__name__)
-app.config["SECRET KEY"] = os.urandom(32)
+#app.config["SECRET KEY"] = os.urandom(32)
+app.config["SECRET_KEY"] = "!§)(§HOIAq38h143ui214h1)"
 
 # sessions
 app.config["PERMANENT_SESSION_LIFETIME"] = False
@@ -41,7 +43,7 @@ def login():
             else:
                 if check_password_hash(user[0], password):
                     session["username"] = username
-                    return "logged in"
+                    return redirect("play")
            
 
 @app.route("/register", methods=["GET", "POST"])
@@ -60,7 +62,9 @@ def register():
             else:
                 return "error"
 
+
 @app.route("/play", methods=["GET", "POST"])
+@login_required
 def play():
     return render_template("play.html")
 
