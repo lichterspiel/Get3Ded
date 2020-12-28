@@ -7,12 +7,14 @@
 {% endblock %}
 
 {% block body %}
+	<h4 id ="room_id" style="color:white;">{{ room  }}</h3>
+	<h3 id="username">{{ username }}</h3>
 	<div>
 		<table class = "board" style="table-layout:fixed;">
 		{% for i in range(3) %}
 			<tr>
 				{% for j in range(3) %}
-					<td id="{{ i }}{{ j  }}" class="board_field" onclick="getPress(id)"><button style="display: none">0</button></td>
+					<td id="{{ i }}{{ j }}" class="board_field" onclick="getPress(id)"><button style="display: none">0</button></td>
 				{% endfor %}
 			</tr>
 		{% endfor %}
