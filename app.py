@@ -1,8 +1,7 @@
 from flask import Flask, render_template, redirect, request, session, url_for
 from flask_socketio import SocketIO, emit, join_room, send
 from werkzeug.security import generate_password_hash, check_password_hash
-import helper
-from helper import login_required
+from helper import *
 from ttt_logic import *
 import sqlite3
 import os
@@ -16,8 +15,6 @@ app.config["SESSION_PERMANENT"] = False
 #socketio init
 socketio = SocketIO(app)
 
-# board
-board = [[0 for i in range(3)]for i in range(3)]
 
 @app.route("/")
 def index():
@@ -40,7 +37,7 @@ def login():
 
         with sqlite3.connect("test.db") as db:
             c = db.cursor()
-            user =  helper.get_user(c, username, password)
+            user =  get_user(c, username, password)
             if user == None:
                 return "wrong username"
             else:
@@ -79,36 +76,45 @@ def create_room():
 @app.route("/play", methods=["GET", "POST"])
 @login_required
 def play():
-    return render_template("play.html", room = session.get("j_room"), username = session.get("username"))
+    session["board"]= [[0 for i in range(3)]for i in range(3)]
+    return render_template("play.html", room = session.get("j_room"))
 
-# chat event shit 
-@socketio.on("my_event") 
-def handle_my_custom_event(json):
-    print(f"received {str(json)}")
-    emit("my response", json)
-
+# when user joins game
 @socketio.on('join', namespace="/play")
 def on_join(data):
     username = data['username']
     room = data['room']
+    session["room"] = room
     join_room(room)
+    with sqlite3.connect("rooms.db") as db:
+        c = db.cursor()
+        if get_usercount(c, room) == 2:
+            return "room already full"
+        else:
+            increase_usercount(c,room)
+            db.commit()
     print(username+ "connected " + room)
-    send(username + ' has entered the room.', room=room)
 
+# when user makes a move
 @socketio.on("move", namespace="/play")
 def move(data):
     # extract y and x coordinates from json
     y = int(data["id"][0])
     x = int(data["id"][1])
-
+    board = session.get("board")
     #check if at coordinates is valid
-    if board[y][x] == 0:
+    if board[y][x] == 0: 
         board[y][x] = "X"
-        emit("valid", data)
+        # when valid send it to client where js modifies the dom 
+        emit("valid", data, room = session["room"])
     else:
-        emit("invalid")
+        emit("invalid", room = session["room"])
 
-    
+
+# when user connects later or refresh site load board again
+@socketio.on("load_board", namespace="/play")
+def load_board():
+    pass
 
 
 

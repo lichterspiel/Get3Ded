@@ -1,15 +1,15 @@
 
 $(document).ready(() => {
 	var room = document.getElementById("room_id").textContent;
-	var username = document.getElementById("username").textContent;
 	var socket = io.connect('http://' + document.domain + ':' + location.port + "/play"); 
 
 
 	socket.on("connect",() => {
 		socket.emit("join",{
-			username: username,
+			username: "test",
 			room: room
 		});
+		socket.emit("load_board")
 	});
 	window.getPress = function getPress(id)
 	{

@@ -46,3 +46,25 @@ def get_user(c,username, password):
     user = c.execute("SELECT password FROM users WHERE username=?", (username,)).fetchone()    
     return user
 
+def increase_usercount(c, room):
+    user_count = c.execute("SELECT user_count FROM rooms WHERE room = ?", room).fetchone()
+    if user_count != None:
+        user_count = int(user_count[0])
+        c.execute("INSERT INTO rooms (room, user_count) VALUES (?, ?)", (room, user_count + 1))
+    else:
+        c.execute("INSERT INTO rooms (room, user_count) VALUES (?, ?)", (room, 1))
+
+def decrement_usercount(c,room):
+    user_count = c.execute("SELECT user_count FROM rooms WHERE room = ?", room).fetchone()
+    if user_count != None:
+        user_count = int(user_count[0])
+        c.execute("INSERT INTO rooms (room, user_count) VALUES (?, ?)", (room, user_count - 1))
+
+def get_usercount(c, room):
+    user_count = c.execute("SELECT user_count FROM rooms WHERE room = ?", (room,)).fetchone()
+
+
+
+
+
+
