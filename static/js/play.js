@@ -26,6 +26,12 @@ $(document).ready(() => {
 		console.log("invalid")
 
 	})
+	
+	socket.on("disconnect", () => {
+		socket.emit("room_left", {
+			room: room
+		})
+	})
 
 		
 })

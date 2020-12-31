@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, request, session, url_for
-from flask_socketio import SocketIO, emit, join_room, send
+from flask_socketio import SocketIO, emit, join_room, send, leave_room
 from werkzeug.security import generate_password_hash, check_password_hash
 from helper import *
 from ttt_logic import *
@@ -67,32 +67,38 @@ def create_room():
     if request.method == "GET":
         return render_template("create_room.html")
     else:
-        if not  request.form.get("room"):
+        room = request.form.get("room")
+        if not room: 
             return("No room given")
         else:
-            session["j_room"] = request.form.get("room")
-            return(redirect(url_for("play")))
+            # check if room is already full (currently max is 2)
+            with sqlite3.connect("rooms.db") as db:
+                c = db.cursor()
+                if get_usercount(c, room) >= 2 :
+                    return "room is full"
+                else:
+                    # if not full then increase usercount in the db 
+                    increase_usercount(c,room)
+                    db.commit()
+
+                    # add room to usser session
+                    session["room"] = room
+                    # redirect to the game
+                    return(redirect(url_for("play")))
 
 @app.route("/play", methods=["GET", "POST"])
 @login_required
 def play():
+    # intitialize board this is  bad change later to be in db or json
     session["board"]= [[0 for i in range(3)]for i in range(3)]
-    return render_template("play.html", room = session.get("j_room"))
+    return render_template("play.html", room = session.get("room"))
 
 # when user joins game
 @socketio.on('join', namespace="/play")
 def on_join(data):
     username = data['username']
     room = data['room']
-    session["room"] = room
     join_room(room)
-    with sqlite3.connect("rooms.db") as db:
-        c = db.cursor()
-        if get_usercount(c, room) == 2:
-            return "room already full"
-        else:
-            increase_usercount(c,room)
-            db.commit()
     print(username+ "connected " + room)
 
 # when user makes a move
@@ -110,6 +116,14 @@ def move(data):
     else:
         emit("invalid", room = session["room"])
 
+
+@socketio.on("room_left", namespace = "/play")
+def room_left():
+    with sqlite3.connect("rooms.db") as db:
+            c = db.cursor()
+            decrement_usercount(c,room)
+            db.commit()
+    leave_room(room)
 
 # when user connects later or refresh site load board again
 @socketio.on("load_board", namespace="/play")
