@@ -1,12 +1,13 @@
-
-$(document).ready(() => {
+$(document).ready( ()=> {
 	var room = document.getElementById("room_id").textContent;
 	var socket = io.connect('http://' + document.domain + ':' + location.port + "/play"); 
+	 //var username = {{ username| tojson}};//"{{ username }}";
 
 
+	console.log(username)
 	socket.on("connect",() => {
 		socket.emit("join",{
-			username: "test",
+			username: username,
 			room: room
 		});
 		socket.emit("load_board")
@@ -27,7 +28,7 @@ $(document).ready(() => {
 
 	})
 	
-	socket.on("disconnect", () => {
+	socket.on("disconnect", (reason) => {
 		socket.emit("room_left", {
 			room: room
 		})

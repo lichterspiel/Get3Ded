@@ -55,7 +55,7 @@ def increase_usercount(c, room):
         c.execute("INSERT INTO rooms (room, user_count) VALUES (?, ?)", (room, 1))
 
 def decrement_usercount(c,room):
-    user_count = c.execute("SELECT user_count FROM rooms WHERE room = ?", room).fetchone()
+    user_count = c.execute("SELECT user_count FROM rooms WHERE room = ?", (room,)).fetchone()
     if user_count != None:
         user_count = int(user_count[0])
         c.execute("UPDATE rooms SET user_count = ? WHERE room = ?", (user_count - 1, room))
@@ -68,6 +68,8 @@ def get_usercount(c, room):
         return user_count[0]
 
 
+def delete_room(c, room):
+    c.execute("DELETE FROM rooms WHERE room = ?", (room,))
 
 
 

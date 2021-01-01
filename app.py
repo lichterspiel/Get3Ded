@@ -68,6 +68,15 @@ def create_room():
         return render_template("create_room.html")
     else:
         room = request.form.get("room")
+        # check if user is already in a room 
+        # if he wants to reconnect reconnect-- if new room delete data from session and make him leaveleave  room
+        if "room" in session:
+            if session["room "] != room:
+                emit("left_room")
+                session.pop("room")
+                session.pop("board")
+            else:
+                return redirect(url_for("play"))
         if not room: 
             return("No room given")
         else:
@@ -84,14 +93,14 @@ def create_room():
                     # add room to usser session
                     session["room"] = room
                     # redirect to the game
-                    return(redirect(url_for("play")))
+                    return redirect(url_for("play"))
 
 @app.route("/play", methods=["GET", "POST"])
 @login_required
 def play():
     # intitialize board this is  bad change later to be in db or json
     session["board"]= [[0 for i in range(3)]for i in range(3)]
-    return render_template("play.html", room = session.get("room"))
+    return render_template("play.html", room = session.get("room"), username = session.get("username") )
 
 # when user joins game
 @socketio.on('join', namespace="/play")
@@ -99,7 +108,7 @@ def on_join(data):
     username = data['username']
     room = data['room']
     join_room(room)
-    print(username+ "connected " + room)
+    print(f" {username} connected {room}")
 
 # when user makes a move
 @socketio.on("move", namespace="/play")
@@ -118,12 +127,17 @@ def move(data):
 
 
 @socketio.on("room_left", namespace = "/play")
-def room_left():
+def room_left(data):
+    print("left")
     with sqlite3.connect("rooms.db") as db:
             c = db.cursor()
-            decrement_usercount(c,room)
+            decrement_usercount(c, session.get("room"))
+            if get_usercount(c, data["room"]) == 0:
+                delete_room(c, room)
             db.commit()
-    leave_room(room)
+    leave_room(session.get("room"))
+    session.pop("room")
+    session.pop("board")
 
 # when user connects later or refresh site load board again
 @socketio.on("load_board", namespace="/play")

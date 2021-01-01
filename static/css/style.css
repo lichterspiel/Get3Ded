@@ -29,6 +29,7 @@ p
 
 .board
 {
+	table-layout: fixed;
 	margin-left: auto;
 	margin-right: auto;
 	width: 300px;
@@ -42,5 +43,6 @@ p
 	border:5px solid #FFFFFF;
 	padding-left: 10px;
 	color: pink;
-	color: pink;
+	height:100px;
+	width: 100px;
 }
