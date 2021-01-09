@@ -15,12 +15,12 @@ $(document).ready( ()=> {
 	window.getPress = function getPress(id)
 	{
 		// change this so when button is pressed send it to server -> validate -> change dom so it is not a button 
-		socket.emit("move", {id : id})
+		socket.emit("move", {id : id, icon: icon})
 	}
 	
 	socket.on("valid", (data) =>{
 		console.log(data.id)
-		document.getElementById(data.id).innerHTML = "X";
+		document.getElementById(data.id).innerHTML = data.icon;
 		console.log("valid")
 	})
 	socket.on("invalid", () => {
@@ -29,6 +29,7 @@ $(document).ready( ()=> {
 	})
 	
 	socket.on("disconnect", (reason) => {
+		console.log("yeaaah")
 		socket.emit("room_left", {
 			room: room
 		})
