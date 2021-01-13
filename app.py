@@ -5,7 +5,9 @@ from helper import *
 from ttt_logic import *
 import sqlite3
 import os
+import json
 
+# TODO IMPORTANT mach das die spieler nur nacheinander moves machen können z.b durch session bool wert, DIe Frage ist nur wie ich das am anfang mache
 # TODO Make board in db or json 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(32)
@@ -163,8 +165,13 @@ def create_room():
 @login_required
 def play():
     # intitialize board this is  bad change later to be in db or json
-    rooms_board[session.get("room")] = [[0 for i in range(3)]for i in range(3)]
-    return render_template("play.html", room = session.get("room"), username = session.get("username") , icon = session.get("icon"))
+    # check if board is already existing
+    if session.get("room") in rooms_board:
+        return render_template("play.html", room = session.get("room"), username = session.get("username") , icon = session.get("icon"))
+
+    else:
+        rooms_board[session.get("room")] = [[0 for i in range(3)]for i in range(3)]
+        return render_template("play.html", room = session.get("room"), username = session.get("username") , icon = session.get("icon"))
 
 
 
@@ -172,9 +179,19 @@ def play():
 # when user joins game
 @socketio.on('join', namespace="/play")
 def on_join(data):
+
+    # if the user was already in a room leave it
+    # currently not WORKING TODO because the room in the session is the true room not the old but it kinda works
+    # save the old room when joining a new one 
+    if session["room"]:
+        leave_room(session.get("room"))
+
+    # extract the data
     username = data['username']
     room = data['room']
     join_room(room)
+    # tell the client that it can now get the board data
+    emit("start_loading", namespace = "/play")
     print(f" {username} connected {room}")
 
 # when user makes a move
@@ -190,29 +207,23 @@ def move(data):
         board[y][x] = session["icon"]
         # when valid send it to client where js modifies the dom 
         emit("valid", data, room = session["room"])
+    #    print(board)
     else:
         emit("invalid", room = session["room"])
 
-
-#@socketio.on("room_left", namespace = "/play")
-def room_left(data):
-    print("left")
-    print("im here")
-    leave_room(session.get("room"))
-    session.pop("room")
-
-# when user connects later or refresh site load board again
-# !TODO! Implement later cant be bothered for that db shit right now
+# load the board when user joins when he left before finishing the game
+# TODO change this when changing how i store the board data
 @socketio.on("load_board", namespace="/play")
 def load_board():
-    pass
+    board = rooms_board.get(session.get("room"))
+    if board:
+        # i parse a array is this bad ? TODO
+        # give the client the board data
+        emit("load", board, namespace = "/play")
 
 
 
 
-
-
-
-
+#=============START THE APP===========#
 if __name__ == "__main__":
     socketio.run(app, debug=True)
