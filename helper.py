@@ -69,7 +69,25 @@ def get_usercount(c, room):
 
 
 def delete_room(c, room):
-    c.execute("DELETE FROM rooms WHERE room = ?", (room,))
+    if ger_usercount(c,room) == 0:
+        c.execute("DELETE FROM rooms WHERE room = ?", (room,))
 
+def join_room_s(c, room):
+    if get_usercount(c, room) < 2:
+        # if not full then increase usercount in the db
+        increase_usercount(c,room)
+        # setting icons of the players
+        if get_usercount(c, room) == 1:
+            session["icon"] = "X"
+            c.execute("INSERT INTO rooms (turn) VALUES (?) WHERE room = ?", (session.get("username"),room))
+        else:
+            session["icon"] = "O"
+    else:
+        return "room is full"
 
-
+def isTurn(c, room):
+    turn = c.execute("SELECT turn FROM rooms WHERE room = ?", (room,))
+    if turn == session.get("username"):
+        return True 
+    else 
+    return False

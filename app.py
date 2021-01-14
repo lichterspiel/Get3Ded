@@ -9,6 +9,7 @@ import json
 
 # TODO IMPORTANT mach das die spieler nur nacheinander moves machen können z.b durch session bool wert, DIe Frage ist nur wie ich das am anfang mache
 # TODO Make board in db or json 
+# TODO I dont need 2 db just 2 tables 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(32)
 #app.config["SECRET_KEY"] = "!§)(§HOIAq38h143ui214h1)"
@@ -21,22 +22,7 @@ app.config["SESSION_PERMANENT"] = False
 socketio = SocketIO(app)
 
 #=========== DO NOT REPEAT ========#
-def join(room):
-    # check if room is already full (currently max is 2)
-    # TODO make this dynamic
-    with sqlite3.connect("rooms.db") as db:
-        c = db.cursor()
-        if get_usercount(c, room) >= 2 :
-            return "room is full"
-        else:
-            # if not full then increase usercount in the db
-            increase_usercount(c,room)
-            db.commit()
- 
-            # add room to usser session
-            session["room"] = room
-            # redirect to the game
-            return redirect(url_for("play"))
+
 
 #================= ROUTES ====================#
 @app.route("/")
@@ -106,30 +92,18 @@ def create_room():
                 with sqlite3.connect("rooms.db") as db:
                     c = db.cursor()
                     decrement_usercount(c, session.get("room"))
-                    if get_usercount(c, session["room"]) == 0:
-                        delete_room(c, room)
+                    # deletes room only if no one is in there
+                    delete_room(c, room)
                     db.commit()
 
                 # clear session values
                 session.pop("room")
 
-
                 # join room
-                with sqlite3.connect("rooms.db") as db:
-                    c = db.cursor()
-                    if get_usercount(c, room) <=  2 :
-                        # if not full then increase usercount in the db
-                        increase_usercount(c,room)
-                        # setting icons of the players
-                        if get_usercount(c, room) == 1:
-                            session["icon"] == "X"
-                        else:
-                            session["icon"] == "O"
-                        db.commit()
- 
-                    else:
-                        return "room is full"
-
+                with sqlite3.connec("rooms.db") as db:
+                    c = db.cursor
+                    join_room_s(c, room)             
+                    db.commit
                 # add room to usser session
                 session["room"] = room
                 # redirect to the game
@@ -143,18 +117,9 @@ def create_room():
             # first time joining TODO kinda reluctant i think
             with sqlite3.connect("rooms.db") as db:
                 c = db.cursor()
-                if get_usercount(c, room) <= 2 :
-                    # if not full then increase usercount in the db
-                    increase_usercount(c,room)
-                    if get_usercount(c ,room) == 1:
-                        session["icon"] = "X"
-                    else:
-                        session["icon"] = "O"
-                    db.commit()
+                join_room_s(c ,room) 
+                db.commit
 
- 
-                else:
-                    return "room is full"
             # add room to usser session
             session["room"] = room
             # redirect to the game
@@ -181,7 +146,7 @@ def play():
 def on_join(data):
 
     # if the user was already in a room leave it
-    # currently not WORKING TODO because the room in the session is the true room not the old but it kinda works
+    # currently not WORKING TODO because the room in the session is the true room not the old but it kinda works cuz i just need the to join the room
     # save the old room when joining a new one 
     if session["room"]:
         leave_room(session.get("room"))
@@ -197,6 +162,11 @@ def on_join(data):
 # when user makes a move
 @socketio.on("move", namespace="/play")
 def move(data):
+    with sqlite3.connect("rooms.db") as db:
+        c = db.cursor
+        if not isturn(c, room):
+            return
+
     # extract y and x coordinates from json
     y = int(data["id"][0])
     x = int(data["id"][1])
@@ -207,7 +177,8 @@ def move(data):
         board[y][x] = session["icon"]
         # when valid send it to client where js modifies the dom 
         emit("valid", data, room = session["room"])
-    #    print(board)
+        
+        # TODO change the turn 
     else:
         emit("invalid", room = session["room"])
 
