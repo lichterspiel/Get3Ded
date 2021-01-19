@@ -9,7 +9,6 @@ import json
 
 # TODO IMPORTANT mach das die spieler nur nacheinander moves machen können z.b durch session bool wert, DIe Frage ist nur wie ich das am anfang mache
 # TODO Make board in db or json 
-# TODO I dont need 2 db just 2 tables 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(32)
 #app.config["SECRET_KEY"] = "!§)(§HOIAq38h143ui214h1)"
@@ -23,12 +22,10 @@ socketio = SocketIO(app)
 
 #=========== DO NOT REPEAT ========#
 
-
 #================= ROUTES ====================#
 @app.route("/")
 def index():
     return render_template("start.html")
-
 
 @app.route("/login", methods=["GET","POST"])
 def login():
@@ -89,7 +86,7 @@ def create_room():
             if session["room"] != room:
                 # delete room if no one is in there
                 # and decremtn usercount of that room
-                with sqlite3.connect("rooms.db") as db:
+                with sqlite3.connect("test.db") as db:
                     c = db.cursor()
                     decrement_usercount(c, session.get("room"))
                     # deletes room only if no one is in there
@@ -100,7 +97,7 @@ def create_room():
                 session.pop("room")
 
                 # join room
-                with sqlite3.connec("rooms.db") as db:
+                with sqlite3.connec("test.db") as db:
                     c = db.cursor
                     join_room_s(c, room)             
                     db.commit
@@ -115,7 +112,7 @@ def create_room():
  
         else:
             # first time joining TODO kinda reluctant i think
-            with sqlite3.connect("rooms.db") as db:
+            with sqlite3.connect("test.db") as db:
                 c = db.cursor()
                 join_room_s(c ,room) 
                 db.commit
@@ -162,7 +159,7 @@ def on_join(data):
 # when user makes a move
 @socketio.on("move", namespace="/play")
 def move(data):
-    with sqlite3.connect("rooms.db") as db:
+    with sqlite3.connect("test.db") as db:
         c = db.cursor
         if not isturn(c, room):
             return
@@ -185,10 +182,10 @@ def move(data):
 # load the board when user joins when he left before finishing the game
 # TODO change this when changing how i store the board data
 @socketio.on("load_board", namespace="/play")
-def load_board():
+def load_board():n
     board = rooms_board.get(session.get("room"))
     if board:
-        # i parse a array is this bad ? TODO
+        # i parse an array is this bad ? TODO
         # give the client the board data
         emit("load", board, namespace = "/play")
 

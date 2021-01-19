@@ -89,5 +89,10 @@ def isTurn(c, room):
     turn = c.execute("SELECT turn FROM rooms WHERE room = ?", (room,))
     if turn == session.get("username"):
         return True 
-    else 
-    return False
+    else:
+        return False
+
+def change_turn(c, room):
+    # TODO add all users to the db
+    #c.execute("INSERT INTO rooms (turn) VALUES (?) WHERE room = ?",)
+    pass
