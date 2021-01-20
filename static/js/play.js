@@ -2,8 +2,7 @@ $(document).ready( ()=> {
 	var room = document.getElementById("room_id").textContent;
 	var socket = io.connect('http://' + document.domain + ':' + location.port + "/play"); 
 	 //var username = {{ username| tojson}};//"{{ username }}";
-
-	console.log(username)
+console.log(username)
 //	socket.on("connect",() => {
 		//socket.emit("join",{
 			//username: username,
@@ -53,6 +52,9 @@ $(document).ready( ()=> {
 	socket.on("invalid", () => {
 		console.log("invalid")
 
+	})
+	socket.on("Winner", data =>{
+		console.log(data.winner)
 	})
 	
 	socket.on("disconnect", (reason) => {

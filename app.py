@@ -7,7 +7,7 @@ import sqlite3
 import os
 import json
 
-# TODO IMPORTANT mach das die spieler nur nacheinander moves machen können z.b durch session bool wert, DIe Frage ist nur wie ich das am anfang mache
+# TODO console log when winning
 # TODO Make board in db or json 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(32)
@@ -21,7 +21,18 @@ app.config["SESSION_PERMANENT"] = False
 socketio = SocketIO(app)
 
 #=========== DO NOT REPEAT ========#
-
+# TODO CONTINUE HERE 
+def checker(board):
+    if (winner := row_check(board)):
+        return winner 
+    elif (winner := column_check(board)):
+        return winner 
+    elif (winner := diagonal_check(board)):
+        return winner
+    elif (winner := diagonal2_check(board)):
+        return winner
+    else:
+        return None
 #================= ROUTES ====================#
 @app.route("/")
 def index():
@@ -97,7 +108,7 @@ def create_room():
                 session.pop("room")
 
                 # join room
-                with sqlite3.connec("test.db") as db:
+                with sqlite3.connect("test.db") as db:
                     c = db.cursor
                     join_room_s(c, room)             
                     db.commit
@@ -160,8 +171,8 @@ def on_join(data):
 @socketio.on("move", namespace="/play")
 def move(data):
     with sqlite3.connect("test.db") as db:
-        c = db.cursor
-        if not isturn(c, room):
+        c = db.cursor()
+        if not isTurn(c, session.get("room")):
             return
 
     # extract y and x coordinates from json
@@ -174,20 +185,29 @@ def move(data):
         board[y][x] = session["icon"]
         # when valid send it to client where js modifies the dom 
         emit("valid", data, room = session["room"])
-        
-        # TODO change the turn 
+
+        # TIC TAC TOE LOGIC check the rows and column if won
+        print(checker(board))
+
+        if checker(board) != None:
+            print("here")
+            winner = checker(board)
+            emit("Winner",{winner: winner}, room = session["room"])
+        with sqlite3.connect("test.db") as db:
+            c = db.cursor()
+            change_turn(c, session.get("room"))
     else:
         emit("invalid", room = session["room"])
 
 # load the board when user joins when he left before finishing the game
 # TODO change this when changing how i store the board data
 @socketio.on("load_board", namespace="/play")
-def load_board():n
+def load_board():
     board = rooms_board.get(session.get("room"))
     if board:
         # i parse an array is this bad ? TODO
         # give the client the board data
-        emit("load", board, namespace = "/play")
+        emit("load", board, room = session.get("room"))
 
 
 
