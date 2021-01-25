@@ -47,7 +47,7 @@ def get_user(c,username, password):
     return user
 
 def increase_usercount(c, room):
-    user_count = c.execute("SELECT user_count FROM rooms WHERE room = ?", (room)).fetchone()
+    user_count = c.execute("SELECT user_count FROM rooms WHERE room = ?", (room,)).fetchone()
     if user_count != None:
         user_count = int(user_count[0])
         c.execute("UPDATE rooms SET user_count = ? WHERE room = ?", (user_count + 1, room))

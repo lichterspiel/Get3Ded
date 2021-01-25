@@ -7,11 +7,10 @@ import sqlite3
 import os
 import json
 
-# TODO console log when winning
 # TODO Make board in db or json 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(32)
-#app.config["SECRET_KEY"] = "!§)(§HOIAq38h143ui214h1)"
+
 
 #TODO temp solution quick and easy make dict of the boards in for each room
 rooms_board = {} 
@@ -109,7 +108,7 @@ def create_room():
 
                 # join room
                 with sqlite3.connect("test.db") as db:
-                    c = db.cursor
+                    c = db.cursor()
                     join_room_s(c, room)             
                     db.commit
                 # add room to usser session
@@ -143,7 +142,12 @@ def play():
         return render_template("play.html", room = session.get("room"), username = session.get("username") , icon = session.get("icon"))
 
     else:
-        rooms_board[session.get("room")] = [[0 for i in range(3)]for i in range(3)]
+
+        rooms_board[session.get("room")] = [["X", "X", "X"],
+                                            [0,0,0],
+                                            [0,0,0]]
+                            
+        #rooms_board[session.get("room")] = [[0 for i in range(3)]for i in range(3)]
         return render_template("play.html", room = session.get("room"), username = session.get("username") , icon = session.get("icon"))
 
 
@@ -164,7 +168,7 @@ def on_join(data):
     room = data['room']
     join_room(room)
     # tell the client that it can now get the board data
-    emit("start_loading", namespace = "/play")
+    emit("start_loading", room = room)
     print(f" {username} connected {room}")
 
 # when user makes a move
@@ -187,12 +191,11 @@ def move(data):
         emit("valid", data, room = session["room"])
 
         # TIC TAC TOE LOGIC check the rows and column if won
-        print(checker(board))
 
         if checker(board) != None:
-            print("here")
-            winner = checker(board)
-            emit("Winner",{winner: winner}, room = session["room"])
+            winner = str(checker(board))
+            print(f"winner is {winner}")
+            emit("Winner",{"winner": winner}, room = session["room"])
         with sqlite3.connect("test.db") as db:
             c = db.cursor()
             change_turn(c, session.get("room"))

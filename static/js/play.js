@@ -34,13 +34,11 @@ console.log(username)
 					var id = String(i) + String(j)
 					document.getElementById(id).innerHTML = String(data[i][j]);
 				}
-			//console.log(data[parsedJSON]);
 			}	
 		}
 	})
 	window.getPress = function getPress(id)
 	{
-		// change this so when button is pressed send it to server -> validate -> change dom so it is not a button 
 		socket.emit("move", {id : id, icon: icon})
 	}
 	
@@ -55,6 +53,7 @@ console.log(username)
 	})
 	socket.on("Winner", data =>{
 		console.log(data.winner)
+
 	})
 	
 	socket.on("disconnect", (reason) => {
