@@ -1,15 +1,7 @@
 $(document).ready( ()=> {
 	var room = document.getElementById("room_id").textContent;
 	var socket = io.connect('http://' + document.domain + ':' + location.port + "/play"); 
-	 //var username = {{ username| tojson}};//"{{ username }}";
-console.log(username)
-//	socket.on("connect",() => {
-		//socket.emit("join",{
-			//username: username,
-			//room: room
-		//});
-	//});
-	
+	console.log(username)
 	// join room
 	socket.emit("join",{
 		username: username,
@@ -37,6 +29,8 @@ console.log(username)
 			}	
 		}
 	})
+
+
 	window.getPress = function getPress(id)
 	{
 		socket.emit("move", {id : id, icon: icon})
@@ -53,6 +47,19 @@ console.log(username)
 	})
 	socket.on("Winner", data =>{
 		console.log(data.winner)
+		if (icon == data.winner)
+		{
+			document.getElementById("overlay").style.display = "block";
+		}
+		else
+		{
+			document.getElementById("place").innerHTML= "Lost";
+			document.getElementById("overlay").style.display = "block";
+		}
+		socket.emit("game_finished", {room: room, winner:data.winner})
+
+	// add emit to delete room in db and update player win /loose count	
+
 
 	})
 	

@@ -71,6 +71,8 @@ def get_usercount(c, room):
 def delete_room(c, room):
     if get_usercount(c,room) == 0:
         c.execute("DELETE FROM rooms WHERE room = ?", (room,))
+def delete_room_e(c,room):
+    c.execute("DELETE FROM rooms WHERE room = ?", (room,))
 
 def join_room_s(c, room):
     if get_usercount(c, room) < 2:
@@ -107,3 +109,5 @@ def change_turn(c, room):
     else:
         # change turn from player 2 to player 1
         c.execute("UPDATE rooms SET turn = ? WHERE room = ?",(p1[0], room))
+
+

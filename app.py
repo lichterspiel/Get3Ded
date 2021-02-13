@@ -1,11 +1,13 @@
 from flask import Flask, render_template, redirect, request, session, url_for
-from flask_socketio import SocketIO, emit, join_room, send, leave_room
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask_socketio import SocketIO, emit, join_room, send, leave_room 
+from werkzeug.security import generate_password_hash, check_password_hash 
 from helper import *
 from ttt_logic import *
 import sqlite3
 import os
 import json
+
+DB = "test.db"
 
 # TODO Make board in db or json 
 app = Flask(__name__)
@@ -51,7 +53,7 @@ def login():
         if not password: 
             return "no password given"
 
-        with sqlite3.connect("test.db") as db:
+        with sqlite3.connect(DB) as db:
             c = db.cursor()
             user =  get_user(c, username, password)
             if user == None:
@@ -136,20 +138,24 @@ def create_room():
 @app.route("/play", methods=["GET", "POST"])
 @login_required
 def play():
-    # intitialize board this is  bad change later to be in db or json
-    # check if board is already existing
-    if session.get("room") in rooms_board:
-        return render_template("play.html", room = session.get("room"), username = session.get("username") , icon = session.get("icon"))
+    if request.method == "GET":
+
+        # intitialize board this is  bad change later to be in db or json
+        # check if board is already existing
+        if session.get("room") in rooms_board:
+            return render_template("play.html", room = session.get("room"), username = session.get("username") , icon = session.get("icon"))
+
+        else:
+
+            #rooms_board[session.get("room")] = [["X", "X", "X"],
+                                            #[0,0,0],
+                                            #[0,0,0]]
+                            
+            rooms_board[session.get("room")] = [[0 for i in range(3)]for i in range(3)]
+            return render_template("play.html", room = session.get("room"), username = session.get("username") , icon = session.get("icon"))
 
     else:
-
-        rooms_board[session.get("room")] = [["X", "X", "X"],
-                                            [0,0,0],
-                                            [0,0,0]]
-                            
-        #rooms_board[session.get("room")] = [[0 for i in range(3)]for i in range(3)]
-        return render_template("play.html", room = session.get("room"), username = session.get("username") , icon = session.get("icon"))
-
+        return redirect(url_for("index"))
 
 
 # =================== SOCKET IO ===================================#
@@ -187,20 +193,37 @@ def move(data):
     #check if at coordinates is valid
     if board[y][x] == 0: 
         board[y][x] = session["icon"]
+        print(board)
         # when valid send it to client where js modifies the dom 
         emit("valid", data, room = session["room"])
 
         # TIC TAC TOE LOGIC check the rows and column if won
 
         if checker(board) != None:
+            print("herer")
             winner = str(checker(board))
             print(f"winner is {winner}")
             emit("Winner",{"winner": winner}, room = session["room"])
         with sqlite3.connect("test.db") as db:
             c = db.cursor()
             change_turn(c, session.get("room"))
+            db.commit()
     else:
+        print("yyyy")
         emit("invalid", room = session["room"])
+
+@socketio.on("game_finished", namespace="/play")
+def game_finished(data):
+    with sqlite3.connect(DB) as db:
+        c = db.cursor()
+        delete_room_e(c,data["room"])
+
+        rooms_board[data["room"]] = None
+        #TODO update user stats
+
+        db.commit()
+
+    pass
 
 # load the board when user joins when he left before finishing the game
 # TODO change this when changing how i store the board data
@@ -208,7 +231,7 @@ def move(data):
 def load_board():
     board = rooms_board.get(session.get("room"))
     if board:
-        # i parse an array is this bad ? TODO
+    # i parse an array is this bad ? TODO
         # give the client the board data
         emit("load", board, room = session.get("room"))
 
