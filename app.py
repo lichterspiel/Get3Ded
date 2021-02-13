@@ -8,7 +8,6 @@ import os
 import json
 
 DB = "test.db"
-
 # TODO Make board in db or json 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.urandom(32)
@@ -22,7 +21,6 @@ app.config["SESSION_PERMANENT"] = False
 socketio = SocketIO(app)
 
 #=========== DO NOT REPEAT ========#
-# TODO CONTINUE HERE 
 def checker(board):
     if (winner := row_check(board)):
         return winner 
