@@ -6,7 +6,7 @@ from ttt_logic import *
 import sqlite3
 import os
 import json
-
+#t
 DB = "test.db"
 # TODO Make board in db or json 
 app = Flask(__name__)
