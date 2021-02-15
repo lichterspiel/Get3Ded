@@ -6,7 +6,7 @@ from ttt_logic import *
 import sqlite3
 import os
 import json
-#t
+
 DB = "test.db"
 # TODO Make board in db or json 
 app = Flask(__name__)
@@ -92,15 +92,19 @@ def create_room():
 
         # check if user is already in a room 
         # if he wants to reconnect reconnect-- if new room delete data from session and make him leaveleave  room
+
         if "room" in session:
             if session["room"] != room:
                 # delete room if no one is in there
                 # and decremtn usercount of that room
+
                 with sqlite3.connect("test.db") as db:
-                    c = db.cursor()
+                    c = db.cursor()    
                     decrement_usercount(c, session.get("room"))
                     # deletes room only if no one is in there
-                    delete_room(c, room)
+                    if get_usercount(c, session["room"]) <= 1:
+                        delete_room(c, session["room"])
+                        rooms_board.pop(session["room"])
                     db.commit()
 
                 # clear session values
@@ -216,7 +220,8 @@ def game_finished(data):
         c = db.cursor()
         delete_room_e(c,data["room"])
 
-        rooms_board[data["room"]] = None
+        rooms_board.pop(data["room"])
+        session.pop("room")
         #TODO update user stats
 
         db.commit()

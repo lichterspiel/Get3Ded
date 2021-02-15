@@ -67,6 +67,12 @@ def get_usercount(c, room):
     else:
         return user_count[0]
 
+def user_in_room(c, room):
+    players_in_room= c.execute("SELECT p1, p2 FROM rooms where room = ?", (room,))
+    if player_in_room[0] == session["username"] or player_in_room[0] == session["username"]:
+        return True
+    else:
+        return False
 
 def delete_room(c, room):
     if get_usercount(c,room) == 0:
