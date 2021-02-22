@@ -37,6 +37,11 @@ def checker(board):
 def index():
     return render_template("start.html")
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
 @app.route("/login", methods=["GET","POST"])
 def login():
     # forget any user

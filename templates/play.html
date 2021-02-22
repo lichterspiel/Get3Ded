@@ -12,7 +12,7 @@
 
 {% block body %}
 	<h4 id ="room_id" style="color:white;">{{ room  }}</h3>
-	<div>
+	<div class="container">
 		<table class = "board" style="table-layout:fixed;">
 		{% for i in range(3) %}
 			<tr>
@@ -24,7 +24,7 @@
 		</table>
 	</div>
 
-	<div id="overlay">
+	<div id="overlay" class="cointainer">
 		<form action="/play" method = "POST"> 
 			<div id="text">
 				<h3 id="place"> Winner</h3>
