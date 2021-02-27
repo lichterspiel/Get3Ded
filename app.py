@@ -16,7 +16,7 @@ app.config["SECRET_KEY"] = os.urandom(32)
 #TODO temp solution quick and easy make dict of the boards in for each room
 rooms_board = {} 
 # sessions
-app.config["SESSION_PERMANENT"] = False
+#app.config["SESSION_PERMANENT"] = False
 #socketio init
 socketio = SocketIO(app)
 
