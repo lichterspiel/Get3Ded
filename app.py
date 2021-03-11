@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, request, session, url_for
-from flask_socketio import SocketIO, emit, join_room, send, leave_room 
-from werkzeug.security import generate_password_hash, check_password_hash 
+from flask_socketio import SocketIO, emit, join_room, send, leave_room
+from werkzeug.security import generate_password_hash, check_password_hash
 from helper import *
 from ttt_logic import *
 import sqlite3
@@ -22,7 +22,7 @@ socketio = SocketIO(app)
 
 #=========== DO NOT REPEAT ========#
 def checker(board):
-    if (winner := row_check(board)):
+    if winner := row_check(board):
         return winner 
     elif (winner := column_check(board)):
         return winner 
@@ -58,14 +58,13 @@ def login():
 
         with sqlite3.connect(DB) as db:
             c = db.cursor()
-            user =  get_user(c, username, password)
+            user =  get_user(c, username)
             if user == None:
                 return "wrong username"
             else:
                 if check_password_hash(user[0], password):
                     session["username"] = username
                     return redirect(url_for("index"))
-           
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -173,8 +172,9 @@ def on_join(data):
     # if the user was already in a room leave it
     # currently not WORKING TODO because the room in the session is the true room not the old but it kinda works cuz i just need the to join the room
     # save the old room when joining a new one 
-    if session["room"]:
-        leave_room(session.get("room"))
+
+    #if session["room"]:
+        #leave_room(session.get("room"))
 
     # extract the data
     username = data['username']
@@ -216,7 +216,6 @@ def move(data):
             change_turn(c, session.get("room"))
             db.commit()
     else:
-        print("yyyy")
         emit("invalid", room = session["room"])
 
 @socketio.on("game_finished", namespace="/play")
@@ -230,8 +229,6 @@ def game_finished(data):
         #TODO update user stats
 
         db.commit()
-
-    pass
 
 # load the board when user joins when he left before finishing the game
 # TODO change this when changing how i store the board data

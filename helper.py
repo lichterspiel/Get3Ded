@@ -1,14 +1,13 @@
-import sqlite3
-from flask import redirect, render_template, request, session, url_for
 from functools import wraps
+from flask import session, redirect
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("username") is None: 
+        if session.get("username") is None:
             return redirect("/login")
         return f(*args, **kwargs)
-    return decorated_function 
+    return decorated_function
 
 # is it better to connec once or every time function is called 
 # connect to database
@@ -26,7 +25,7 @@ def create_database(c):
 	PRIMARY KEY("id" AUTOINCREMENT)
     )''')
     return 0
-    
+
 def register_user(c,username, password):
     # ? needs to take in a tuple
     # check if username and password is not empty
@@ -41,8 +40,7 @@ def register_user(c,username, password):
     else:
         return False
 
-    
-def get_user(c,username, password):
+def get_user(c,username):
     user = c.execute("SELECT password FROM users WHERE username=?", (username,)).fetchone()    
     return user
 
@@ -69,7 +67,7 @@ def get_usercount(c, room):
 
 def user_in_room(c, room):
     players_in_room= c.execute("SELECT p1, p2 FROM rooms where room = ?", (room,))
-    if player_in_room[0] == session["username"] or player_in_room[0] == session["username"]:
+    if players_in_room[0] == session["username"] or players_in_room[0] == session["username"]:
         return True
     else:
         return False
