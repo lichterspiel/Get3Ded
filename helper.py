@@ -33,7 +33,7 @@ def register_user(c,username, password):
         # check if username doesnt exist
         user = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
         if user != None:
-            return False 
+            return False
         else:
             c.execute("INSERT INTO users (username, password) VALUES (?,?)", (username,password))
             return True
