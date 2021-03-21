@@ -11,7 +11,7 @@ The Server checks the validity and when its valid if someone has won.
 Then the game ends.
 
 
-#In detail
+# In detail
 App.py contains all the code for the website. The routes and Socketio code.
 
 There is a login,logout,play,create_room funtion. Login and logout are self explanatory. 
