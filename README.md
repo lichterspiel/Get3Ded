@@ -1,5 +1,4 @@
 # Tic Tac TOnline
-#### URL: https://www.youtube.com/watch?v=m2AIlS5hsBs
 #### Description:
 This is an tic tac toe implementation to play on a website against a friend.It works with flask and socketio. 
 Flask is used to make the webserver work and socketio for the client server communication when playing tic tac toe. 
