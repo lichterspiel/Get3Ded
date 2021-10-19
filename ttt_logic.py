@@ -35,7 +35,6 @@ def column_check(board):
             O_count = 0
     return False
 
-
 def diagonal_check(board):
     X_count = 0
     O_count = 0

@@ -40,7 +40,7 @@ def checker(board):
     else:
         return None
 
-# ============= Routes ================#
+#============= Routes ================#
 
 
 @app.route("/")
@@ -130,10 +130,9 @@ def play():
     else:
         return redirect(url_for(".index"))
 
-# =================== SOCKET IO ===================================#
+#=================== SOCKET IO ===================================#
+
 # when user joins game
-
-
 @socketio.on('join', namespace="/play")
 def on_join(data):
 
@@ -153,7 +152,6 @@ def on_join(data):
     print(f" {username} connected {room}")
 
 # when user makes a move
-
 
 @socketio.on("move", namespace="/play")
 def move(data):
@@ -215,5 +213,6 @@ def load_board():
 
 
 #=============START THE APP===========#
+
 if __name__ == "__main__":
     socketio.run(app, debug=True)
