@@ -33,7 +33,7 @@ $(document).ready( ()=> {
 
 	window.getPress = function getPress(id)
 	{
-		socket.emit("move", {id : id, icon: icon})
+		socket.emit("move", {id : id, icon: icon});
 	}
 	
 	socket.on("valid", (data) =>{

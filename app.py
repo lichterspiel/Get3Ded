@@ -160,6 +160,7 @@ def move(data):
         if not isTurn(c, session.get("room")) or get_usercount(c, session.get("room")) != 2:
             return
 
+    print("§")
     # extract y and x coordinates from json
     y = int(data["id"][0])
     x = int(data["id"][1])
@@ -185,6 +186,7 @@ def move(data):
             db.commit()
     else:
         emit("invalid", room=session["room"])
+        
 
 
 @socketio.on("game_finished", namespace="/play")
